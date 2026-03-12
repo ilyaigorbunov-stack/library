@@ -272,18 +272,19 @@ async function loadBooks(){
 
 async function importData(){
   var data = JSON.parse(document.getElementById('initData').textContent);
-  var batch = db.batch();
-  var count = 0;
-  for(var i=0; i<data.length; i++){
-    var ref = db.collection('books').doc();
-    batch.set(ref, data[i]);
-    count++;
-    if(count % 400 === 0){
-      await batch.commit();
-      batch = db.batch();
-    }
+  var CHUNK = 100;
+  for(var i=0; i<data.length; i+=CHUNK){
+    var chunk = data.slice(i, i+CHUNK);
+    var batch = db.batch();
+    chunk.forEach(function(b){
+      var ref = db.collection('books').doc();
+      batch.set(ref, b);
+    });
+    await batch.commit();
+    var pct = Math.round((i+chunk.length)/data.length*100);
+    document.getElementById('grid').innerHTML = '<div class="loading-screen">Загружаем книги: '+pct+'%<br><small>'+(i+chunk.length)+' из '+data.length+'</small></div>';
+    await new Promise(function(r){setTimeout(r,300);});
   }
-  if(count % 400 !== 0) await batch.commit();
 }
 
 function initUI(){
