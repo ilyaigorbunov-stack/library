@@ -331,14 +331,14 @@ function render(){
   var page=filtered.slice((cur-1)*PAGE,cur*PAGE);
   document.getElementById('rc').innerHTML='Найдено: <strong>'+filtered.length+'</strong>';
   if(!page.length){
-    grid.innerHTML='<div class="empty"><div class="empty-icon">📚</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос</p></div>';
+    grid.innerHTML='<div class="empty"><div class="empty-icon"></div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос</p></div>';
     document.getElementById('pag').innerHTML='';return;
   }
   var html='';
   page.forEach(function(b){
     var col=colors[b.genre]||'#d4cdb8';
     var desc=b.description?'<div class="cdesc">'+esc(b.description)+'</div>':'';
-    var adm=isAdmin?'<div class="card-admin-btns"><button class="btn-edit" data-id="'+b._docId+'">✏ Изменить</button><button class="btn-del" data-id="'+b._docId+'">✕ Удалить</button></div>':'';
+    var adm=isAdmin?'<div class="card-admin-btns"><button class="btn-edit" data-id="'+b._docId+'">Изменить</button><button class="btn-del" data-id="'+b._docId+'">Удалить</button></div>':'';
     html+='<div class="card" data-id="'+b._docId+'">';
     html+='<div class="spine" style="background:'+col+'"></div>';
     html+='<div class="cbody">';
