@@ -338,21 +338,37 @@ function render(){
   page.forEach(function(b){
     var col=colors[b.genre]||'#d4cdb8';
     var desc=b.description?'<div class="cdesc">'+esc(b.description)+'</div>':'';
-    var adm=isAdmin?'<div class="card-admin-btns"><button class="btn-edit" onclick="event.stopPropagation();editBook(''+b._docId+'')">✏ Изменить</button><button class="btn-del" onclick="event.stopPropagation();askDelete(''+b._docId+'',''+b.title.replace(/'/g,"\'")+'')" >✕ Удалить</button></div>':'';
-    html+='<div class="card" onclick="openM(''+b._docId+'')">'
-      +'<div class="spine" style="background:'+col+'"></div>'
-      +'<div class="cbody">'
-      +'<div class="gtag">'+esc(b.genre||'Книга')+'</div>'
-      +'<div class="ctitle">'+esc(b.title)+'</div>'
-      +'<div class="cauthor">'+esc(b.author)+'</div>'
-      +desc
-      +'<div class="meta">'
-      +(b.year?'<span class="pill py">'+esc(b.year)+'</span>':'')
-      +(b.classLevel?'<span class="pill pc">'+esc(b.classLevel)+' кл.</span>':'')
-      +'<span class="pill pe">'+(b.copies||1)+' экз.</span>'
-      +'</div>'+adm+'</div></div>';
+    var adm=isAdmin?'<div class="card-admin-btns"><button class="btn-edit" data-id="'+b._docId+'">✏ Изменить</button><button class="btn-del" data-id="'+b._docId+'">✕ Удалить</button></div>':'';
+    html+='<div class="card" data-id="'+b._docId+'">';
+    html+='<div class="spine" style="background:'+col+'"></div>';
+    html+='<div class="cbody">';
+    html+='<div class="gtag">'+esc(b.genre||'Книга')+'</div>';
+    html+='<div class="ctitle">'+esc(b.title)+'</div>';
+    html+='<div class="cauthor">'+esc(b.author)+'</div>';
+    html+=desc;
+    html+='<div class="meta">';
+    if(b.year) html+='<span class="pill py">'+esc(b.year)+'</span>';
+    if(b.classLevel) html+='<span class="pill pc">'+esc(b.classLevel)+' кл.</span>';
+    html+='<span class="pill pe">'+(b.copies||1)+' экз.</span>';
+    html+='</div>'+adm+'</div></div>';
   });
   grid.innerHTML=html;
+  grid.querySelectorAll('.card').forEach(function(card){
+    var docId=card.getAttribute('data-id');
+    card.addEventListener('click',function(){ openM(docId); });
+  });
+  if(isAdmin){
+    grid.querySelectorAll('.btn-edit').forEach(function(btn){
+      btn.addEventListener('click',function(e){ e.stopPropagation(); editBook(btn.getAttribute('data-id')); });
+    });
+    grid.querySelectorAll('.btn-del').forEach(function(btn){
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        var b=BOOKS.find(function(x){return x._docId===btn.getAttribute('data-id');});
+        askDelete(btn.getAttribute('data-id'), b?b.title:'');
+      });
+    });
+  }
   renderPag();
 }
 
