@@ -166,6 +166,7 @@ select:focus{border-color:var(--gold)}
         <div><div class="dlbl">&#1050;&#1083;&#1072;&#1089;&#1089;</div><div class="dval" id="mc"></div></div>
         <div><div class="dlbl">&#8470; &#1074; &#1082;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075;&#1077;</div><div class="dval" id="mn"></div></div>
       </div>
+      <div id="mExtra" style="margin-bottom:16px"></div>
       <button class="mclose" onclick="closeM()">&#1047;&#1072;&#1082;&#1088;&#1099;&#1090;&#1100;</button>
     </div>
   </div>
@@ -217,6 +218,14 @@ select:focus{border-color:var(--gold)}
       <img class="cover-prev" id="coverPreview" src="" alt="">
     </div>
     <div class="fi"><label>&#1054;&#1087;&#1080;&#1089;&#1072;&#1085;&#1080;&#1077;</label><textarea id="bDesc"></textarea></div>
+    <div class="fi"><label>&#1057;&#1077;&#1088;&#1080;&#1103;</label><input type="text" id="bSeries" placeholder="&#1085;&#1072;&#1087;&#1088;. &#1064;&#1082;&#1086;&#1083;&#1100;&#1085;&#1072;&#1103; &#1073;&#1080;&#1073;&#1083;&#1080;&#1086;&#1090;&#1077;&#1082;&#1072;"></div>
+    <div class="fi"><label>&#1048;&#1079;&#1076;&#1072;&#1090;&#1077;&#1083;&#1100;&#1089;&#1090;&#1074;&#1086;</label><input type="text" id="bPublisher" placeholder="&#1085;&#1072;&#1087;&#1088;. &#1055;&#1088;&#1086;&#1089;&#1074;&#1077;&#1097;&#1077;&#1085;&#1080;&#1077;"></div>
+    <div class="fi"><label>&#1054;&#1073;&#1098;&#1105;&#1084; (&#1089;&#1090;&#1088;.)</label><input type="number" id="bPages" placeholder="&#1085;&#1072;&#1087;&#1088;. 256" min="1"></div>
+    <div class="fi">
+      <label>&#1050;&#1083;&#1102;&#1095;&#1077;&#1074;&#1099;&#1077; &#1089;&#1083;&#1086;&#1074;&#1072;</label>
+      <input type="text" id="bKeywords" placeholder="&#1087;&#1090;&#1080;&#1094;&#1099;, &#1087;&#1088;&#1080;&#1088;&#1086;&#1076;&#1072;, &#1087;&#1091;&#1090;&#1077;&#1096;&#1077;&#1089;&#1090;&#1074;&#1080;&#1103; (&#1095;&#1077;&#1088;&#1077;&#1079; &#1079;&#1072;&#1087;&#1103;&#1090;&#1091;&#1102;)">
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">&#1055;&#1086; &#1101;&#1090;&#1080;&#1084; &#1089;&#1083;&#1086;&#1074;&#1072;&#1084; &#1073;&#1091;&#1076;&#1077;&#1090; &#1088;&#1072;&#1073;&#1086;&#1090;&#1072;&#1090;&#1100; &#1087;&#1086;&#1080;&#1089;&#1082;</div>
+    </div>
     <div class="ferr" id="berr">&#1047;&#1072;&#1087;&#1086;&#1083;&#1085;&#1080;&#1090;&#1077; &#1085;&#1072;&#1079;&#1074;&#1072;&#1085;&#1080;&#1077; &#1080; &#1072;&#1074;&#1090;&#1086;&#1088;&#1072;</div>
     <button class="bp" onclick="saveBook()">&#1057;&#1086;&#1093;&#1088;&#1072;&#1085;&#1080;&#1090;&#1100;</button>
     <button class="bs" onclick="closeBookForm()">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
@@ -357,7 +366,10 @@ function doFilter() {
   filtered = BOOKS.filter(function(b) {
     if (g && b.genre !== g) return false;
     if (c && b.classLevel !== c) return false;
-    if (q && (b.title + ' ' + b.author).toLowerCase().indexOf(q) < 0) return false;
+    if (q) {
+      var searchText = (b.title + ' ' + b.author + ' ' + (b.keywords||'')).toLowerCase();
+      if (searchText.indexOf(q) < 0) return false;
+    }
     return true;
   });
   cur = 1; render();
@@ -456,6 +468,15 @@ function openM(docId) {
   var mc = document.getElementById('mcover');
   if (b.cover) { mc.src = b.cover; mc.style.display = 'block'; }
   else mc.style.display = 'none';
+  var extra = '';
+  if (b.series) extra += '<div style="margin-bottom:8px"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">\u0421\u0435\u0440\u0438\u044f</span><div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px">' + esc(b.series) + '</div></div>';
+  if (b.publisher) extra += '<div style="margin-bottom:8px"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">\u0418\u0437\u0434\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u043e</span><div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px">' + esc(b.publisher) + '</div></div>';
+  if (b.pages) extra += '<div style="margin-bottom:8px"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">\u041e\u0431\u044a\u0451\u043c</span><div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px">' + b.pages + ' \u0441\u0442\u0440.</div></div>';
+  if (b.keywords) {
+    var tags = b.keywords.split(',').map(function(k){ return '<span style="display:inline-block;background:rgba(201,168,76,.15);color:#8a6d1a;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin:2px">' + esc(k.trim()) + '</span>'; }).join('');
+    extra += '<div style="margin-bottom:8px"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600">\u041a\u043b\u044e\u0447\u0435\u0432\u044b\u0435 \u0441\u043b\u043e\u0432\u0430</span><div style="margin-top:6px">' + tags + '</div></div>';
+  }
+  document.getElementById('mExtra').innerHTML = extra;
   document.getElementById('ov').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -477,7 +498,8 @@ function doLogout() { auth.signOut(); }
 function showAddBook() {
   editDocId = null;
   document.getElementById('bft').textContent = '\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043a\u043d\u0438\u0433\u0443';
-  ['bTitle','bAuthor','bYear','bDesc','bCoverUrl'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['bTitle','bAuthor','bYear','bDesc','bCoverUrl','bSeries','bPublisher','bKeywords'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('bPages').value='';
   document.getElementById('bCopies').value = '1';
   document.getElementById('bGenre').value = '';
   document.getElementById('bClass').value = '';
@@ -498,6 +520,10 @@ function editBook(docId) {
   document.getElementById('bCopies').value = b.copies||1;
   document.getElementById('bClass').value = b.classLevel||'';
   document.getElementById('bDesc').value = b.description||'';
+  document.getElementById('bSeries').value = b.series||'';
+  document.getElementById('bPublisher').value = b.publisher||'';
+  document.getElementById('bPages').value = b.pages||'';
+  document.getElementById('bKeywords').value = b.keywords||'';
   document.getElementById('bCoverUrl').value = '';
   var prev = document.getElementById('coverPreview');
   if (b.cover) { prev.src = b.cover; prev.style.display = 'block'; }
@@ -536,6 +562,10 @@ function saveBook() {
     copies:parseInt(document.getElementById('bCopies').value)||1,
     classLevel:document.getElementById('bClass').value,
     description:document.getElementById('bDesc').value.trim(),
+    series:document.getElementById('bSeries').value.trim(),
+    publisher:document.getElementById('bPublisher').value.trim(),
+    pages:parseInt(document.getElementById('bPages').value)||0,
+    keywords:document.getElementById('bKeywords').value.trim(),
     cover: coverVal || ''
   };
   if (editDocId) {
